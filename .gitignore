@@ -1,4 +1,5 @@
 # Ignore YOLOv8 datasets
-pv_aga_label_to_fine_tunning.v1i.yolov8/
+labeled_fine_tunning.v4i.yolov8/
 rzeszowSolar panels seg.v2i.yolov8/
+auto_pv_to_fine_tunning.v4i.yolov8/
 best.pt
