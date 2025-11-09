@@ -3,4 +3,4 @@ This repository comprises works undertaken to evaluate and train AI models used 
 
 ## scope
 - performance assessment of YOLOv8-based detection models for solar panels
-- segmentation of solar panelson images
+- segmentation of solar panels on images
