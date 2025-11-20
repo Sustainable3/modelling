@@ -28,13 +28,14 @@ if __name__ == 'main':
     
     for model_key, model in models.items():
         model = YOLO(model)
+        suffix = ',0,0,0' if model_key != 'finloop' else ''
         for data_key, dataset in datasets.items():
             bt = 16 if model_key == 'pools' else 64
             for splt in splits[data_key]:
                 t = time()
                 results = model.val(data=dataset, single_cls=True, batch=bt, iou=0.7, split=splt, plots=True, project=f'runs/{data_key}_{splt}_{model_key}')
                 with open('evaluation_results.csv', 'a') as f:
-                    f.write(f'{data_key},{splt},{model_key},{results.to_csv(decimals=3).splitlines()[1]}\n')
+                    f.write(f'{data_key},{splt},{model_key},{results.to_csv(decimals=3).splitlines()[1]}{suffix}\n')
                 print('done', model_key, data_key, splt, 'in', time()-t)
     
     print('end')
