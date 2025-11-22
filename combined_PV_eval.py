@@ -54,7 +54,7 @@ if __name__ == 'main':
     print('start')
 
     with open('evaluation_results.csv', 'a') as f:
-        f.write('dataset,split,model,class_id,Class,Images,Instances,Box-P,Box-R,Box-F1,mAP50,mAP50-95,Mask-P,Mask-R,Mask-F1\n')
+        f.write('dataset,split,model,Class,Images,Instances,Box-P,Box-R,Box-F1,mAP50,mAP50-95,Mask-P,Mask-R,Mask-F1\n')
     
     for model_key, model in models.items():
         model = YOLO(model)
