@@ -1,3 +1,6 @@
 dataset,split,model,class_id,Class,Images,Instances,Box-P,Box-R,Box-F1,mAP50,mAP50-95,Mask-P,Mask-R,Mask-F1
-pilot,val,finloop,0,solar-panel,54,227,0.547,0.414,0.471,0.379,0.202,0.202,0.159,0.178
-pilot,val,ariel,0,solar-panel,54,227,0.546,0.429,0.48,0.402,0.207,0,0,0
+dataset,split,model,class_id,Class,Images,Instances,Box-P,Box-R,Box-F1,mAP50,mAP50-95,Mask-P,Mask-R,Mask-F1
+pilot,val,finloop,solar-panel,54,227,0.547,0.414,0.471,0.379,0.202,0.202,0.159,0.178
+synth,train,finloop,solar-panel,150,374,0.396,0.275,0.325,0.273,0.115,0.254,0.184,0.214
+synth,val,finloop,solar-panel,12,35,0.501,0.571,0.534,0.538,0.259,0.361,0.429,0.392
+synth,test,finloop,solar-panel,18,32,0.342,0.375,0.358,0.298,0.095,0.222,0.219,0.22

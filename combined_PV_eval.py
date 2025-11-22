@@ -1,5 +1,24 @@
 from ultralytics import YOLO
 from time import time
+import torch
+
+def sprawdz_gpu():
+    print(f"Wersja PyTorch: {torch.__version__}")
+    
+    # 1. Sprawdzanie NVIDIA CUDA (Windows/Linux)
+    if torch.cuda.is_available():
+        print("\n GPU (CUDA) jest dostępne!")
+        print(f"Liczba urządzeń: {torch.cuda.device_count()}")
+        print(f"Nazwa obecnego GPU: {torch.cuda.get_device_name(0)}")
+        device = torch.device("cuda")
+        
+        
+    # 3. Brak GPU
+    else:
+        print("\n GPU nie jest dostępne. Obliczenia będą wykonywane na CPU.")
+        device = torch.device("cpu")
+    
+    print(f"Aktywne urządzenie: {device}")
 
 if __name__ == 'main':
 
@@ -20,6 +39,17 @@ if __name__ == 'main':
     'rzeszow': "rzeszowSolar panels seg.v2i.yolov8-obb/data.yaml",
     'synth': 'auto_pv_to_fine_tunning.v4i.yolov8-obb/data.yaml'
     }
+    
+    models = {
+        'finloop': 'best.pt'
+    }
+    
+    datasets = {
+    'pilot': "pilotPV_panels.v1i.yolov8-obb/data.yaml",
+    'synth': 'auto_pv_to_fine_tunning.v4i.yolov8-obb/data.yaml'
+    }
+
+    sprawdz_gpu()
 
     print('start')
 
