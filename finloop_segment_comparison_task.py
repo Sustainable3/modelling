@@ -84,7 +84,7 @@ def sum_pv_segments(pth, model, nazwa="no_info_run", dev=torch.device('cpu'), pr
             plt.show()
     return pv_area
 
-def sum_pv_segments_sam(pth, model, nazwa="no_info_run", dev=torch.device('cpu'), print_info=False, disp_img=False, display_coef=100):
+def sum_pv_segments_sam(pth, model, sam, nazwa="no_info_run", dev=torch.device('cpu'), print_info=False, disp_img=False, display_coef=100):
     pv_area = 0
     yolo_results = model(pth, save=print_info, name=nazwa, stream=True, device=dev, verbose=print_info)
     for i, res in enumerate(yolo_results):
@@ -144,7 +144,7 @@ if __name__ == '__main__':
         with open('finloop_comparison.csv', 'a') as f:
             f.write(f'{data_key},segment,{area},{t}\n')
         t = time()
-        area = sum_pv_segments_sam(dataset, model=model, nazwa=data_key, dev=dev, print_info=False)
+        area = sum_pv_segments_sam(dataset, model=model, sam=sam, nazwa=data_key, dev=dev, print_info=False)
         t = time()-t
         print('done', 'finloop with SAM', data_key, 'in', t)
         with open('finloop_comparison.csv', 'a') as f:
