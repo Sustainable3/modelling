@@ -14,8 +14,24 @@ XI 25
 *MD*
 """
 
-from time import time
 from ultralytics import YOLO
+from time import time
+import torch
+
+def sprawdz_gpu():
+    print(f"Wersja PyTorch: {torch.__version__}")
+    
+    if torch.cuda.is_available():
+        print("\n GPU (CUDA) jest dostępne!")
+        print(f"Liczba urządzeń: {torch.cuda.device_count()}")
+        print(f"Nazwa obecnego GPU: {torch.cuda.get_device_name(0)}")
+        device = torch.device("cuda")
+        
+    else:
+        print("\n GPU nie jest dostępne. Obliczenia będą wykonywane na CPU.")
+        device = torch.device("cpu")
+    
+    print(f"Aktywne urządzenie: {device}")
 
 if __name__ == '__main__':
 
@@ -26,7 +42,7 @@ if __name__ == '__main__':
     }
 
     splits = {
-        'pilot': ['val'],
+        'pilot': ['val'], # in yaml test=val or so, adjustable
         'rzeszow': ['val', 'test'],
         'synth': ['train', 'val', 'test']
     }
@@ -37,7 +53,11 @@ if __name__ == '__main__':
         'pools': 'solarpanels_pools_yolov8l-p2_1024_v1.pt'
     }
 
-    with open('evaluation_results.csv', 'a') as f:
+    sprawdz_gpu()
+
+    print('start')
+
+    with open('evaluation_results.csv', 'w') as f:
         f.write('dataset,split,model,Class,Images,Instances,Box-P,Box-R,Box-F1,mAP50,mAP50-95,Mask-P,Mask-R,Mask-F1,t\n')
 
     for data_key, dataset in datasets.items():
@@ -53,3 +73,4 @@ if __name__ == '__main__':
                     f.write(f'{data_key},{splt},{model_key},{results.to_csv(decimals=3).splitlines()[1]}{suffix},{t}\n')
                 print('done', model_key, data_key, splt, 'in', t)
 
+    print('end')
