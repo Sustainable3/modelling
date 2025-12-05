@@ -105,8 +105,8 @@ if __name__ == '__main__':
 
     models = {
         'finloop': 'best.pt',
-        'ariel': 'final-mosaic-augmentation.pt',
-        'pools': 'solarpanels_pools_yolov8l-p2_1024_v1.pt'
+        'ariel': 'final-mosaic-augmentation.pt', # 'detector.pt'
+        'pools': 'solarpanels_pools_yolov8l-p2_1024_v1.pt' # pytorch_model.bin converted with config.json
     }
 
     """## run"""
