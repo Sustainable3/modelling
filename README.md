@@ -9,6 +9,7 @@ This repository comprises works undertaken to evaluate and train AI models used 
 ## acknowledgements
 > Obliczenia wykonano z wykorzystaniem komputerów Centrum Informatycznego Trójmiejskiej Akademickiej Sieci Komputerowej" (Computations were carried out using the computers of Centre of Informatics Tricity Academic Supercomputer & Network).
 
-models:
+### PV models:
 - [finloop](https://huggingface.co/finloop/yolov8s-seg-solar-panels)
-- 
+- [Ariel Drabkin's](https://huggingface.co/spaces/ArielDrabkin/Solar-Panel-Detector/tree/main)
+- [Andrew Gray's](https://huggingface.co/andrewgray11/autotrain-solar-panel-object-detection-50559120777)
