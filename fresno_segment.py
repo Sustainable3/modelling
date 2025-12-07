@@ -1,3 +1,20 @@
+"""
+Docstring for fresno_segment
+
+segmentation & area calculation for large-scale tifs
+- SAHI-sliced detection with YOLO
+- SAM segmentation
+- composition control
+- exporting segments
+- csv results
+
+this code with a few awful comments and magic lines was adapted from GenAI results
+and subject to very limited review
+
+credit: 10.6084/m9.figshare.3385780
+
+MD, XII 25
+"""
 import torch
 import cv2
 import numpy as np
