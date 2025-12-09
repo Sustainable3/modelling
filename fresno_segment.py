@@ -25,11 +25,12 @@ from tqdm import tqdm
 from ultralytics.models import SAM
 from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
+from time import time
 
 # --- CONFIGURATION ---
 IMAGES_DIR = "fresno_obb/valid/images/"        # Input Directory
 OUTPUT_DIR = "./output_masked_ultralytics2"      # Output Directory for images
-CSV_PATH = "area_stats2.csv"         # Output CSV for statistics
+CSV_PATH = "fresno_area2.csv"         # Output CSV for statistics
 
 YOLO_PATH = "best.pt"
 SAM_MODEL_TYPE = "sam_b.pt"         # sam_l.pt
@@ -39,7 +40,7 @@ SLICE_SIZE = 640
 OVERLAP = 0.2
 PADDING = 50                        # Context padding for SAM crops
 
-def main():
+def main(yolo=YOLO_PATH):
     # Setup
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     image_files = glob(os.path.join(IMAGES_DIR, "*.tif"))
@@ -55,12 +56,13 @@ def main():
     # PHASE 1: Detection (YOLO + SAHI)
     # ==========================================
     print("\n" + "="*40)
-    print("PHASE 1: Detection (YOLO)")
+    print("PHASE 1: Detection (YOLO)", yolo)
     print("="*40)
+    t = time()
     
     yolo_model = AutoDetectionModel.from_pretrained(
         model_type='yolov8',
-        model_path=YOLO_PATH,
+        model_path=yolo,
         confidence_threshold=0.45,
         device=device
     )
@@ -103,11 +105,6 @@ def main():
     print("\n" + "="*40)
     print(f"PHASE 2: Segmentation ({SAM_MODEL_TYPE})")
     print("="*40)
-
-    # Initialize CSV
-    with open(CSV_PATH, mode='w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(["Filename", "Total_Pixels_Image", "Object_Pixels", "Object_Percentage", "Num_Objects"])
 
     # Load SAM
     sam_model = SAM(SAM_MODEL_TYPE)
@@ -172,7 +169,7 @@ def main():
         percentage = (object_pixels / total_pixels) * 100
 
         # Save to CSV
-        write_stats(img_path, total_pixels, object_pixels, percentage, len(boxes))
+        write_stats(img_path, total_pixels, object_pixels, percentage, len(boxes), time()-t, yolo)
 
         # --- SAVE MASKED IMAGE ---
         # Create white background
@@ -181,16 +178,21 @@ def main():
         final_image = np.where(global_mask[..., None], image_bgr, white_bg)
         
         filename = os.path.basename(img_path)
-        save_path = os.path.join(OUTPUT_DIR, f"masked_{filename}")
+        save_path = os.path.join(OUTPUT_DIR, f"{yolo}_masked_{filename}")
         cv2.imwrite(save_path, final_image)
 
     print(f"\nProcessing complete. Stats saved to {CSV_PATH}")
 
-def write_stats(img_path, total, obj_px, pct, num_objs=0):
+def write_stats(img_path, total, obj_px, pct, num_objs=0, time=1.0, mod=YOLO_PATH):
     with open(CSV_PATH, mode='a', newline='') as f:
         writer = csv.writer(f)
         filename = os.path.basename(img_path)
-        writer.writerow([filename, total, obj_px, f"{pct:.4f}", num_objs])
+        writer.writerow([mod, filename, total, obj_px, f"{pct:.4f}", num_objs, time])
 
 if __name__ == "__main__":
-    main()
+    # Initialize CSV
+    with open(CSV_PATH, mode='w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Model", "Filename", "Total_Pixels_Image", "Object_Pixels", "Object_Percentage", "Num_Objects", "Time"])
+    for y in ['best.pt', 'final-mosaic-augmentation.pt', 'solarpanels_pools_yolov8l-p2_1024_v1.pt']:
+        main(y)

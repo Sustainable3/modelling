@@ -1,5 +1,5 @@
 """
-Docstring for pv_segment_fresno
+Docstring for fresno_demo
 
 segmentation demo large-scale tifs
 - SAHI-sliced detection with YOLO
