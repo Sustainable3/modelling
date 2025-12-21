@@ -24,3 +24,4 @@ This repository comprises works undertaken to evaluate and train AI models used 
     - [pool_segment_with_sam.ipynb](pool_segment_with_sam.ipynb)
     - [SAM_segment_comparison.ipynb](SAM_segment_comparison.ipynb)
     - [sam_comparison.csv](sam_comparison.csv) 
+- performance assessment of tree models (Deepforest+SAM, CLIPSeg, SegFormer)
