@@ -3,6 +3,16 @@ This repository comprises works undertaken to evaluate and train AI models used 
 
 ## scope
 - performance assessment of YOLOv8-based detection models for solar panels
+- segmentation of solar panels on images
+
+
+## acknowledgements
+> Obliczenia wykonano z wykorzystaniem komputerów Centrum Informatycznego Trójmiejskiej Akademickiej Sieci Komputerowej" (Computations were carried out using the computers of Centre of Informatics Tricity Academic Supercomputer & Network).
+
+### PV models:
+- [finloop](https://huggingface.co/finloop/yolov8s-seg-solar-panels)
+- [Ariel Drabkin's](https://huggingface.co/spaces/ArielDrabkin/Solar-Panel-Detector/tree/main)
+- [Andrew Gray's](https://huggingface.co/andrewgray11/autotrain-solar-panel-object-detection-50559120777)
     - [ariel_ultimate_eval_X_25.ipynb](ariel_ultimate_eval_X_25.ipynb)
     - [finloop_ultimate_eval_X_25.ipynb](finloop_ultimate_eval_X_25.ipynb)
     - [pool_ultimate_eval_X_25.ipynb](pool_ultimate_eval_X_25.ipynb)
