@@ -1,0 +1,46 @@
+import numpy as np
+import torch
+from PIL import Image
+from transformers import AutoImageProcessor, SegformerForSemanticSegmentation
+import matplotlib.pyplot as plt
+
+def overlay_image_mask(image_pil, mask, color=(0, 255, 0), alpha=0.4):
+    image = np.array(image_pil).copy()
+    overlay = image.copy()
+    overlay[mask == 1] = color
+    blended = (image * (1 - alpha) + overlay * alpha).astype(np.uint8)
+    return blended
+
+# Wczytanie obrazu
+image_path =  "modelling\\tree_area\\tile_r01_c01.jpg"
+image = Image.open(image_path)
+
+# Model konfiguracja
+processor_sf = AutoImageProcessor.from_pretrained("restor/tcd-segformer-mit-b2")
+model_sf = SegformerForSemanticSegmentation.from_pretrained("restor/tcd-segformer-mit-b2")
+inputs_sf = processor_sf(images=image, return_tensors="pt")
+
+# Model predykcja i stworzenie maski
+with torch.no_grad():
+    outputs_sf = model_sf(**inputs_sf)
+mask = outputs_sf.logits.argmax(dim=1).squeeze().cpu().numpy()
+mask_resized = np.array(Image.fromarray(mask.astype(np.uint8)).resize(image.size))
+
+classes = np.unique(mask_resized)
+
+# Obliczenie pikseli całego obrazu
+total_pixels =  mask_resized.size
+
+# Obliczenie pikseli drzew
+tree_pixels = np.sum(mask_resized == 1)
+
+# Obliczenie udziału powierzchni 
+tree_area_share = tree_pixels / total_pixels
+
+print(tree_area_share)
+
+# Wizualizacja dla porównania
+blended = overlay_image_mask(image, mask_resized)
+plt.figure(figsize=(8,8))
+plt.imshow(blended)
+plt.show()

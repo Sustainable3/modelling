@@ -1,0 +1,70 @@
+import numpy as np
+import torch
+import os
+from PIL import Image
+from transformers import AutoImageProcessor, SegformerForSemanticSegmentation
+import pandas as pd
+import argparse
+
+def calculate_tree_area(input_path, device):
+    results = []
+    # Model konfiguracja
+    processor = AutoImageProcessor.from_pretrained("restor/tcd-segformer-mit-b2")
+    model = SegformerForSemanticSegmentation.from_pretrained("restor/tcd-segformer-mit-b2").to(device)
+    model.eval()
+
+    image_files = [
+        f for f in os.listdir(input_path)
+        if f.lower().endswith(".jpg")
+    ]
+
+    if not image_files:
+        print("No JPG images found in:", input_path)
+        return
+
+    for img_name in image_files:
+        img_path = os.path.join(input_path, img_name)
+        image = Image.open(img_path).convert("RGB")
+        inputs = processor(images=image, return_tensors="pt")
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+        
+        # Predykcja i stworzenie maski
+        with torch.no_grad():
+           outputs_sf = model(**inputs)
+
+        mask = outputs_sf.logits.argmax(dim=1).squeeze().cpu().numpy()
+        mask_resized = np.array(Image.fromarray(mask.astype(np.uint8)).resize(image.size))
+
+        total_pixels =  mask_resized.size
+        tree_pixels = np.sum(mask_resized == 1)
+
+        # Obliczenie udziału powierzchni 
+        tree_area_share = tree_pixels / total_pixels
+
+        results.append({
+        "image": img_name,
+        "tree_area_share": tree_area_share,
+        "tree_area_percent": tree_area_share * 100
+        })
+    df = pd.DataFrame(results)
+    print(df)
+    df.to_csv("modelling/tree_area/tree_results.csv", index=False)
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Calculate tree area share using SegFormer"
+    )
+    parser.add_argument(
+        "--input_dir",
+        type=str,
+        default="modelling/tree_area/images",
+        help="Path to directory with JPG images"
+    )
+    return parser.parse_args()
+
+if __name__ == "__main__":
+    args  = parse_args()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    calculate_tree_area(args.input_dir, device)
