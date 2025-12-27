@@ -8,3 +8,9 @@ runs/
 pilotPV_panels.v1i.yolov8-obb/
 rzeszowSolar panels seg.v2i.yolov8-obb/
 wyniki_zb/
+fresno_seg/
+fresno_obb/
+s*/
+yolo_dataset_ready/
+*.pt*.tif
+varia/
