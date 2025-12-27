@@ -74,7 +74,7 @@ class GroundTruthLoader:
         poly_list = self.gt_map[img_name_no_ext]
         boxes, classes, masks = [], [], []
 
-        for item in poly_list:
+        for item in poly_list: # for every polygon in the json file
             # FIX: Ensure int32 for OpenCV
             vertices = np.array(item["polygon_vertices_pixels"], dtype=np.int32)
             if vertices.size == 0: continue
