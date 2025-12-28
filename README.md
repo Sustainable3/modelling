@@ -11,7 +11,7 @@ This repository comprises works undertaken to evaluate and train AI models used 
 
 ### PV models:
 - [finloop](https://huggingface.co/finloop/yolov8s-seg-solar-panels)
-- [Ariel Drabkin's](https://huggingface.co/spaces/ArielDrabkin/Solar-Panel-Detector/tree/main)
+- [Ariel Drabkin's](https://github.com/ArielDrabkin/Solar-Panel-Detector)
 - [Andrew Gray's](https://huggingface.co/andrewgray11/autotrain-solar-panel-object-detection-50559120777)
     - [ariel_ultimate_eval_X_25.ipynb](ariel_ultimate_eval_X_25.ipynb)
     - [finloop_ultimate_eval_X_25.ipynb](finloop_ultimate_eval_X_25.ipynb)
