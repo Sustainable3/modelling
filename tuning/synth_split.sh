@@ -4,7 +4,7 @@
 # this previously awful-looking script was adapted from a genAI output
 # MD, XII 25
 
-SRC_DIR="dane_syntetyczne"
+SRC_DIR="../dane_syntetyczne"
 DEST_DIR="synth_dataset"
 TRAIN_PERCENT=70
 VAL_PERCENT=20
