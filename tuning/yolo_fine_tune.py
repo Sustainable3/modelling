@@ -1,3 +1,11 @@
+'''
+Docstring for tuning.yolo_fine_tune
+
+fine tuning YOLO PV model on new synthetics
+
+MD, XII
+
+'''
 from ultralytics import YOLO
 
 model = YOLO('../best.pt')
