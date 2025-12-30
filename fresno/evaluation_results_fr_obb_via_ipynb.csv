@@ -1,0 +1,4 @@
+dataset,split,model,Class,Images,Instances,Box-P,Box-R,Box-F1,mAP50,mAP50-95,Mask-P,Mask-R,Mask-F1,t
+fresno_obb,val,finloop,0,solar-panel,2,182,0.0,0.0,0.0,0.0,0.0,0.021,0.016,0.019,10.381137132644653
+fresno_obb,val,ariel,0,solar-panel,2,182,0.0,0.0,0.0,0.0,0.0,0,0,0,5.104468584060669
+fresno_obb,val,pools,0,solarpanel,2,182,0.009,0.016,0.012,0.005,0.003,0,0,0,5.9886415004730225
