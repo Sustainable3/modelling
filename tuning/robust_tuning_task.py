@@ -24,9 +24,8 @@ PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
 SYNTH_D_NEW = './synth_dataset2/data.yaml' # 1st+2nd stage; 2nd split - no leakage by agumentations in train+test
 SYNTH_D_OLD = './auto_pv_to_fine_tunning.v4i.yolov8-obb/data.yaml' # for full eval
 RZESZOW_D = './rzeszow_data/data.yaml' # eval on test
-RZESZOW_VAL = './rzeszow_data/data_val.yaml' # 3rd training stage
-SYNTH_NEW_RZESZ_D = 'data_synth2_rzesz.yaml' # 2nd stage with some from rzeszow/val for training
-# TODO: combine synth-new splits for training to balance rzesz/val
+RZESZOW_VAL = './rzeszow_data/data_val.yaml' # 3rd training stage - rzesz/val
+SYNTH_NEW_RZESZ_D = 'data_synth2_rzesz.yaml' # 2nd stage, synth/train+val with rzeszow/val for training
 
 def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_frozen=10) -> str:
 
@@ -49,7 +48,7 @@ def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_fro
 
         verbose=True,
         device=0,
-        cache=True,
+        cache=True, # True==ram; disk
         # single_cls=True,
         pretrained=True,
     )
@@ -166,7 +165,7 @@ def main():
     mod, id = tune_val(1, 2, BASE_MODEL, SYNTH_D_NEW, RZESZOW_D, 's', lr) # train: synth-train, test: rzesz-test
     # many_eval(mod)
     mod, id = tune_val(id, 2, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, 'sr', lr/2) # train: synth-train+rzesz-val, test: rzesz-test
-    # TODO: freeze more 
+    # TODO: freeze more in 3
     mod, id = tune_val(id, 2, mod, RZESZOW_VAL, RZESZOW_D, 'r', lr/5) # train: rzesz-val, test: rzesz-test
     many_eval(mod)
 
