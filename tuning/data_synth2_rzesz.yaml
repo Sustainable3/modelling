@@ -1,5 +1,6 @@
 train:
   - synth_dataset2/training/images
+  - synth_dataset2/validation/images
   - rzeszow_data/valid/images
 val: synth_dataset2/validation/images
 test: synth_dataset2/test/images
