@@ -16,10 +16,10 @@ BASE_MODEL = 'yolo11l-seg.pt'
 PERFORM_DECAY_LIMIT_FACTOR = 0.8
 OPTIMISER = 'auto'
 OPTIMISER = 'SGD'
-# OPTIMISER = 'AdamW'
+OPTIMISER = 'AdamW'
 
 PROJECT_NAME = 'fine_trening'
-PROJECT_NAME = 'ft7'
+PROJECT_NAME = 'ft8'
 PROJECT_NAME = f'{PROJECT_NAME}_{OPTIMISER}'
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -203,10 +203,10 @@ def main():
 
     t = time()
     no_layers = len(YOLO(BASE_MODEL).model.model)
-    print(no_layers, 'layers')
+    print(OPTIMISER, no_layers, 'layers')
 
     lr = 0.001
-    # lr = 0.0005
+    lr = 0.0005
     # lr = 0.0001
     mod, id = tune_val(1, 3, BASE_MODEL, SYNTH_D_NEW, RZESZOW_D, 's', lr) # train: synth-train, test: rzesz-test
     # many_eval(mod)
