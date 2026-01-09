@@ -16,7 +16,7 @@ BASE_MODEL = 'yolo11l-seg.pt'
 PERFORM_DECAY_LIMIT_FACTOR = 0.8
 OPTIMISER = 'auto'
 OPTIMISER = 'SGD'
-OPTIMISER = 'AdamW'
+# OPTIMISER = 'AdamW'
 
 PROJECT_NAME = 'fine_trening'
 PROJECT_NAME = 'ft7'
