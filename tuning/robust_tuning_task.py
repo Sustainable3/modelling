@@ -19,7 +19,7 @@ OPTIMISER = 'SGD'
 OPTIMISER = 'AdamW'
 
 PROJECT_NAME = 'fine_trening'
-PROJECT_NAME = 'ft6'
+PROJECT_NAME = 'ft7'
 PROJECT_NAME = f'{PROJECT_NAME}_{OPTIMISER}'
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -101,7 +101,7 @@ def evaluation(model_pth: str, dataset: str, stage: str, splt='test', is_feval=F
         f_mod = 'a'
         tm = f',{t}' # save eval time
     with open(pth, f_mod) as f:
-        f.write(f'{stage},{splt},{csv_data}{tm}')
+        f.write(f'{stage},{splt},{csv_data}{tm}\n')
 
     return metrics
 
