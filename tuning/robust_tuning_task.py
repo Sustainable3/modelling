@@ -23,6 +23,7 @@ PROJECT_NAME = f'{PROJECT_NAME}_{OPTIMISER}'
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
 SYNTH_D_NEW = './synth_dataset2/data.yaml' # 1st+2nd stage; 2nd split - no leakage by agumentations in train+test
+SYNTH_D_NEW1 = './synth_dataset/data.yaml' # 1st+2nd stage; 2nd split - no leakage by agumentations in train+test
 SYNTH_D_OLD = './auto_pv_to_fine_tunning.v4i.yolov8-obb/data.yaml' # for full eval
 RZESZOW_D = './rzeszow_data/data.yaml' # eval on test
 RZESZOW_VAL = './rzeszow_data/data_val.yaml' # 3rd training stage - rzesz/val
@@ -114,7 +115,7 @@ def many_eval(model):
 
 def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: str, stage: str, lr=0.001, eps = 10, n_frozen=10, v_splt='test'):
     """
-    train and evaluate, repeat n times
+    train and evaluate, repeat n times. stop if the performance drops by 20% from the best
     
     :param start_id: part of a nickname
     :type start_id: int
@@ -132,6 +133,8 @@ def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: st
     :param eps: no. epochs
     :param n_frozen: no. frozen layers
     :param v_splt: dataset-specific, train/val/test/etc.
+    :return model: path to the best model
+    :return id: part of a nickname
     """
     best_map = 0
     best_m_f1 = 0
@@ -172,14 +175,16 @@ def main():
     # mod = training(mod, RZESZOW_VAL, '6SR', 0.00001, n_frozen=12)
     # metr = evaluation(mod, RZESZOW_D, '6SR')
 
+    no_layers = len(YOLO(BASE_MODEL).model.model)
+    print(no_layers, 'layers')
+
     lr = 0.001
     # lr = 0.0005
     # lr = 0.0001
-    mod, id = tune_val(1, 2, BASE_MODEL, SYNTH_D_NEW, RZESZOW_D, 's', lr) # train: synth-train, test: rzesz-test
+    mod, id = tune_val(1, 3, BASE_MODEL, SYNTH_D_NEW, RZESZOW_D, 's', lr) # train: synth-train, test: rzesz-test
     # many_eval(mod)
     mod, id = tune_val(id, 2, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, 'sr', lr/2) # train: synth-train+rzesz-val, test: rzesz-test
-    # TODO: freeze more in 3 but more reliably
-    mod, id = tune_val(id, 2, mod, RZESZOW_VAL, RZESZOW_D, 'r', lr/5, n_frozen=15) # train: rzesz-val, test: rzesz-test
+    mod, id = tune_val(id, no_layers-2, mod, RZESZOW_VAL, RZESZOW_D, 'r', lr/5, n_frozen=15) # train: rzesz-val, test: rzesz-test
     many_eval(mod)
 
 
