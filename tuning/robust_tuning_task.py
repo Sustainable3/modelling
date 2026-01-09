@@ -1,5 +1,6 @@
 import torch
 from ultralytics import YOLO
+from time import time
 '''
 fine-tuning script for PV det+seg YOLO model
 according to the recipe by prof. PS
@@ -15,10 +16,10 @@ BASE_MODEL = 'yolo11l-seg.pt'
 PERFORM_DECAY_LIMIT_FACTOR = 0.8
 OPTIMISER = 'auto'
 OPTIMISER = 'SGD'
-# OPTIMISER = 'AdamW'
+OPTIMISER = 'AdamW'
 
 PROJECT_NAME = 'fine_trening'
-PROJECT_NAME = 'ft5'
+PROJECT_NAME = 'ft6'
 PROJECT_NAME = f'{PROJECT_NAME}_{OPTIMISER}'
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -33,6 +34,7 @@ def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_fro
 
     model = YOLO(model_pth)
     print('start training', stage)
+    t = time()
 
     model.train(
         data=dataset,
@@ -55,15 +57,28 @@ def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_fro
         pretrained=True,
     )
 
-    print('training done', stage)
+    print('training done', stage, 'in', time()-t)
 
     return str(model.trainer.best)
 
 
 def evaluation(model_pth: str, dataset: str, stage: str, splt='test', is_feval=False):
+    '''
+    Evaluate a model on a dataset/split
+    
+    :param model_pth: path to a .pt
+    :type model_pth: str
+    :param dataset: .yaml path
+    :type dataset: str
+    :param stage: part of a nickname
+    :type stage: str
+    :param splt: a dataset split
+    :param is_feval: for combining all metrics in a single .csv in full evaluation
+    '''
 
     model = YOLO(model_pth)
     print('eval', stage, splt)
+    t = time()
 
     metrics = model.val(
         data=dataset,
@@ -74,16 +89,19 @@ def evaluation(model_pth: str, dataset: str, stage: str, splt='test', is_feval=F
     )
 
     csv_data = metrics.to_csv(decimals = 3)
-    print('eval done', stage, splt)
+    t = time()-t
+    print('eval done', stage, splt, 'in', t)
     
     pth = f"{PROJECT_NAME}/{stage}_{splt}.csv"
     f_mod = 'w'
+    tm = '' # save eval time
     if is_feval:
         csv_data = csv_data.split('\n')[1] # skip header
         pth = f"{PROJECT_NAME}/feval.csv"
         f_mod = 'a'
+        tm = f',{t}' # save eval time
     with open(pth, f_mod) as f:
-        f.write(f'{stage},{splt},{csv_data}')
+        f.write(f'{stage},{splt},{csv_data}{tm}')
 
     return metrics
 
@@ -94,23 +112,28 @@ def many_eval(model):
     
     :param model: YOLO model
     '''
-    ds = 'synth_new'
-    evaluation(model, SYNTH_D_NEW, ds, 'train')
-    evaluation(model, SYNTH_D_NEW, ds, 'val')
-    evaluation(model, SYNTH_D_NEW, ds, 'test')
+    ds = 'synth_new2' # train-val-test split by src img
+    evaluation(model, SYNTH_D_NEW, ds, 'train', True)
+    evaluation(model, SYNTH_D_NEW, ds, 'val', True)
+    evaluation(model, SYNTH_D_NEW, ds, 'test', True)
+    
+    ds = 'synth_new1' # shuffeled train-val-test split (src img and augmentations may be in any split)
+    evaluation(model, SYNTH_D_NEW1, ds, 'train', True)
+    evaluation(model, SYNTH_D_NEW1, ds, 'val', True)
+    evaluation(model, SYNTH_D_NEW1, ds, 'test', True)
 
     ds = 'synth_old'
-    evaluation(model, SYNTH_D_OLD, ds, 'train')
-    evaluation(model, SYNTH_D_OLD, ds, 'val')
-    evaluation(model, SYNTH_D_OLD, ds, 'test')
+    evaluation(model, SYNTH_D_OLD, ds, 'train', True)
+    evaluation(model, SYNTH_D_OLD, ds, 'val', True)
+    evaluation(model, SYNTH_D_OLD, ds, 'test', True)
 
     ds = 'rzeszow'
-    evaluation(model, RZESZOW_D, ds, 'train')
-    evaluation(model, RZESZOW_D, ds, 'val')
-    evaluation(model, RZESZOW_D, ds, 'test')
+    evaluation(model, RZESZOW_D, ds, 'train', True)
+    evaluation(model, RZESZOW_D, ds, 'val', True)
+    evaluation(model, RZESZOW_D, ds, 'test', True)
 
     ds = 'pilot'
-    evaluation(model, PILOT_D, ds, 'test')
+    evaluation(model, PILOT_D, ds, 'test', True)
 
 
 def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: str, stage: str, lr=0.001, eps = 10, n_frozen=10, v_splt='test'):
@@ -138,11 +161,13 @@ def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: st
     """
     best_map = 0
     best_m_f1 = 0
+    t = time()
+    print('start phase', stage, 'for', n, 'reps')
 
     for id in range(start_id, start_id + n):
-        stage = f'{id}_{stage}'
-        model = training(model, tr_dataset, stage, lr, eps, n_frozen)
-        metrics = evaluation(model, val_dataset, stage, v_splt)
+        stg = f'{id}_{stage}'
+        model = training(model, tr_dataset, stg, lr, eps, n_frozen)
+        metrics = evaluation(model, val_dataset, stg, v_splt)
         if metrics.box.map < best_map * PERFORM_DECAY_LIMIT_FACTOR or metrics.seg.f1 < best_m_f1 * PERFORM_DECAY_LIMIT_FACTOR:
             print('performance decay!')
             break
@@ -153,6 +178,7 @@ def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: st
             print('outperformed by mask-f1')
             best_m_f1 = metrics.seg.f1
 
+    print('done phase', stage, 'in', time()-t)
     return model, id
 
 
@@ -175,6 +201,7 @@ def main():
     # mod = training(mod, RZESZOW_VAL, '6SR', 0.00001, n_frozen=12)
     # metr = evaluation(mod, RZESZOW_D, '6SR')
 
+    t = time()
     no_layers = len(YOLO(BASE_MODEL).model.model)
     print(no_layers, 'layers')
 
@@ -184,7 +211,8 @@ def main():
     mod, id = tune_val(1, 3, BASE_MODEL, SYNTH_D_NEW, RZESZOW_D, 's', lr) # train: synth-train, test: rzesz-test
     # many_eval(mod)
     mod, id = tune_val(id, 2, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, 'sr', lr/2) # train: synth-train+rzesz-val, test: rzesz-test
-    mod, id = tune_val(id, no_layers-2, mod, RZESZOW_VAL, RZESZOW_D, 'r', lr/5, n_frozen=15) # train: rzesz-val, test: rzesz-test
+    mod, id = tune_val(id, 2, mod, RZESZOW_VAL, RZESZOW_D, 'r', lr/5, n_frozen=no_layers-2) # train: rzesz-val, test: rzesz-test
+    print('fine tuning took', time()-t)
     many_eval(mod)
 
 
