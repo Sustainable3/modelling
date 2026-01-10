@@ -15,10 +15,10 @@ BASE_MODEL = 'yolo11l-seg.pt'
 PERFORM_DECAY_LIMIT_FACTOR = 0.8
 # OPTIMISER = 'auto'
 OPTIMISER = 'SGD'
-#OPTIMISER = 'AdamW'
+OPTIMISER = 'AdamW'
 
 PROJECT_NAME = 'fine_trening'
-PROJECT_NAME = 'ft12'
+PROJECT_NAME = 'ft12b'
 PROJECT_NAME = f'{PROJECT_NAME}_{OPTIMISER}'
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -40,7 +40,7 @@ def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_fro
         data=dataset,
         epochs=eps,
         lr0=lr,
-        lrf=1.0,
+        lrf=0.01,
         batch=16,
         optimizer=OPTIMISER,
         freeze=n_frozen,
@@ -212,8 +212,9 @@ def main():
     # many_eval(mod)
     mod, id = tune_val(id, 5, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, 'sr', lr/2) # train: synth-train+rzesz-val, test: rzesz-test
     mod, id = tune_val(id, 5, mod, RZESZOW_VAL, RZESZOW_D, 'r', lr/5, n_frozen=no_layers-2) # train: rzesz-val, test: rzesz-test
-    print('fine tuning took', time()-t)
+    t = time() - t
     many_eval(mod)
+    print(PROJECT_NAME, 'fine tuning took', t)
 
 
 if __name__ == '__main__':
