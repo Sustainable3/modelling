@@ -15,10 +15,10 @@ BASE_MODEL = 'yolo11l-seg.pt'
 PERFORM_DECAY_LIMIT_FACTOR = 0.8
 # OPTIMISER = 'auto'
 OPTIMISER = 'SGD'
-OPTIMISER = 'AdamW'
+#OPTIMISER = 'AdamW'
 
 PROJECT_NAME = 'fine_trening'
-PROJECT_NAME = 'ft11'
+PROJECT_NAME = 'ft12'
 PROJECT_NAME = f'{PROJECT_NAME}_{OPTIMISER}'
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -208,10 +208,10 @@ def main():
     lr = 0.001
     lr = 0.0005
     lr = 0.0001
-    mod, id = tune_val(1, 3, BASE_MODEL, SYNTH_D_NEW, RZESZOW_D, 's', lr) # train: synth-train, test: rzesz-test
+    mod, id = tune_val(1, 5, BASE_MODEL, SYNTH_D_NEW, RZESZOW_D, 's', lr) # train: synth-train, test: rzesz-test
     # many_eval(mod)
-    mod, id = tune_val(id, 3, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, 'sr', lr/2) # train: synth-train+rzesz-val, test: rzesz-test
-    mod, id = tune_val(id, 3, mod, RZESZOW_VAL, RZESZOW_D, 'r', lr/5, n_frozen=no_layers-2) # train: rzesz-val, test: rzesz-test
+    mod, id = tune_val(id, 5, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, 'sr', lr/2) # train: synth-train+rzesz-val, test: rzesz-test
+    mod, id = tune_val(id, 5, mod, RZESZOW_VAL, RZESZOW_D, 'r', lr/5, n_frozen=no_layers-2) # train: rzesz-val, test: rzesz-test
     print('fine tuning took', time()-t)
     many_eval(mod)
 
