@@ -8,8 +8,6 @@ MD, I 26
 import os
 import csv
 
-DS = 'rzeszow'
-SPLT = 'train'
 LN = 9 # rzeszow-train, early ft saved differently (ft4 would be incorrect)
 DIR = 'tuning/results/'
 OUT = 'merged_feval.csv'
