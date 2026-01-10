@@ -1,4 +1,3 @@
-import torch
 from ultralytics import YOLO
 from time import time
 '''
@@ -19,7 +18,7 @@ OPTIMISER = 'SGD'
 OPTIMISER = 'AdamW'
 
 PROJECT_NAME = 'fine_trening'
-PROJECT_NAME = 'ft10'
+PROJECT_NAME = 'ft11'
 PROJECT_NAME = f'{PROJECT_NAME}_{OPTIMISER}'
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -29,6 +28,7 @@ SYNTH_D_OLD = './auto_pv_to_fine_tunning.v4i.yolov8-obb/data.yaml' # for full ev
 RZESZOW_D = './rzeszow_data/data.yaml' # eval on test
 RZESZOW_VAL = './rzeszow_data/data_val.yaml' # 3rd training stage - rzesz/val
 SYNTH_NEW_RZESZ_D = 'data_synth2_rzesz.yaml' # 2nd stage, synth/train+val with rzeszow/val for training
+
 
 def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_frozen=10) -> str:
 
@@ -207,7 +207,7 @@ def main():
 
     lr = 0.001
     lr = 0.0005
-    #lr = 0.0001
+    lr = 0.0001
     mod, id = tune_val(1, 3, BASE_MODEL, SYNTH_D_NEW, RZESZOW_D, 's', lr) # train: synth-train, test: rzesz-test
     # many_eval(mod)
     mod, id = tune_val(id, 3, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, 'sr', lr/2) # train: synth-train+rzesz-val, test: rzesz-test
