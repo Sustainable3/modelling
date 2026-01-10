@@ -18,7 +18,7 @@ OPTIMISER = 'SGD'
 OPTIMISER = 'AdamW'
 
 PROJECT_NAME = 'fine_trening'
-PROJECT_NAME = 'ft12b'
+PROJECT_NAME = 'ft12c'
 PROJECT_NAME = f'{PROJECT_NAME}_{OPTIMISER}'
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -41,7 +41,7 @@ def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_fro
         epochs=eps,
         lr0=lr,
         lrf=0.01,
-        batch=16,
+        batch=32,
         optimizer=OPTIMISER,
         freeze=n_frozen,
 
