@@ -22,8 +22,8 @@ SGD = 'SGD'
 ADAMW = 'AdamW'
 RMS = 'RMSProp'
 
-PROJECT_NAME = 'ft22' # mod ft7 settings
-LR = 0.001
+PROJECT_NAME = 'ft23' # mod ft7 settings
+LR = 0.0005
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
 SYNTH_D_NEW2 = './synth_dataset2/data_synth.yaml' # 1st+2nd stage; synth/train+val; 2nd split - no leakage by agumentations in train+test
@@ -65,8 +65,8 @@ def training(model_pth: str, dataset: str, pn: str, stage: str, opt: str, lr: fl
         data=dataset,
         epochs=eps,
         lr0=lr,
-        lrf=0.5,
-        batch=32,
+        lrf=1.0,
+        batch=16,
         optimizer=opt,
         freeze=n_frozen,
 
