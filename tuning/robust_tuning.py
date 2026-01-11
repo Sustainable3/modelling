@@ -22,7 +22,7 @@ SGD = 'SGD'
 ADAMW = 'AdamW'
 RMS = 'RMSProp'
 
-PROJECT_NAME = 'ft21' # mod ft7 settings
+PROJECT_NAME = 'ft22' # mod ft7 settings
 LR = 0.001
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -66,7 +66,7 @@ def training(model_pth: str, dataset: str, pn: str, stage: str, opt: str, lr: fl
         epochs=eps,
         lr0=lr,
         lrf=0.5,
-        batch=16,
+        batch=32,
         optimizer=opt,
         freeze=n_frozen,
 
