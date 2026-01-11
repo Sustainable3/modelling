@@ -6,7 +6,7 @@ MD, I 26
 import os
 import csv
 
-DS = 'pilot'
+DS = 'synth_new1'
 SPLT = 'test'
 DIR = 'tuning/results/'
 OUT = 'merged_feval'
