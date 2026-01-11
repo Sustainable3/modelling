@@ -65,8 +65,8 @@ def training(model_pth: str, dataset: str, pn: str, stage: str, opt: str, lr: fl
         data=dataset,
         epochs=eps,
         lr0=lr,
-        lrf=1.0,
-        batch=0.5,
+        lrf=0.5,
+        batch=16,
         optimizer=opt,
         freeze=n_frozen,
 
