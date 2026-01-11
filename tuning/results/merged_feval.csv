@@ -39,6 +39,12 @@ ft24_RMSProp_ariel.pt_feval.csv,0.499,0.464,0.208,0
 ft24_RMSProp_feval.csv,0.0,0.0,0.0,0.0
 ft24_SGD_ariel.pt_feval.csv,0.796,0.836,0.499,0
 ft24_SGD_feval.csv,0.467,0.404,0.229,0.454
+ft25_AdamW_ariel.pt_feval.csv,0.761,0.791,0.468,0
+ft25_AdamW_feval.csv,0.51,0.453,0.277,0.491
+ft25_RMSProp_ariel.pt_feval.csv,0.436,0.383,0.158,0
+ft25_RMSProp_feval.csv,0.029,0.139,0.051,0.022
+ft25_SGD_ariel.pt_feval.csv,0.81,0.849,0.514,0
+ft25_SGD_feval.csv,0.467,0.405,0.231,0.454
 ft4_feval_SGD.csv,0.374,0.275,0.127,0.313
 ft7_feval_AdamW.csv,0.568,0.532,0.322,0.553
 ft7_feval_auto.csv,0.576,0.563,0.341,0.569
