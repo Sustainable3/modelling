@@ -6,8 +6,8 @@ MD, I 26
 import os
 import csv
 
-DS = 'synth_new1'
-SPLT = 'test'
+DS = 'synth_new2'
+SPLT = 'train'
 DIR = 'tuning/results/'
 OUT = 'merged_feval'
 FOUT = f'{OUT}_{DS}_{SPLT}'

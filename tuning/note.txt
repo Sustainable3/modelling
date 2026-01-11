@@ -15,3 +15,5 @@ full eval - everything
 
 datasets:
 for feval rzeszow/train and test are swapped
+
+for segmentation model: ft21_SGD
