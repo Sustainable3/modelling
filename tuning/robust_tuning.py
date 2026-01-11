@@ -1,4 +1,5 @@
 from ultralytics import YOLO
+from ultralytics.utils.metrics import Metric
 from time import time
 '''
 fine-tuning script for PV det+seg YOLO model
@@ -11,26 +12,50 @@ I 2026, MD
 
 
 BASE_MODEL = 'yolo11l-seg.pt'
+SEG = 'segment'
+ARIEL = 'ariel.pt'
+DET = 'detect'
 
 PERFORM_DECAY_LIMIT_FACTOR = 0.8
-# OPTIMISER = 'auto'
-OPTIMISER = 'SGD'
-OPTIMISER = 'AdamW'
 
-PROJECT_NAME = 'fine_trening'
-PROJECT_NAME = 'ft12c'
-PROJECT_NAME = f'{PROJECT_NAME}_{OPTIMISER}'
+SGD = 'SGD'
+ADAMW = 'AdamW'
+RMS = 'RMSProp'
+
+PROJECT_NAME = 'ft20' # mod ft7 settings
+LR = 0.001
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
-SYNTH_D_NEW = './synth_dataset2/data.yaml' # 1st+2nd stage; 2nd split - no leakage by agumentations in train+test
-SYNTH_D_NEW1 = './synth_dataset/data.yaml' # 1st+2nd stage; 2nd split - no leakage by agumentations in train+test
+SYNTH_D_NEW2 = './synth_dataset2/data_synth.yaml' # 1st+2nd stage; synth/train+val; 2nd split - no leakage by agumentations in train+test
+SYNTH_D_NEW1 = './synth_dataset/data.yaml' # 1st split, previously too
 SYNTH_D_OLD = './auto_pv_to_fine_tunning.v4i.yolov8-obb/data.yaml' # for full eval
-RZESZOW_D = './rzeszow_data/data.yaml' # eval on test
-RZESZOW_VAL = './rzeszow_data/data_val.yaml' # 3rd training stage - rzesz/val
-SYNTH_NEW_RZESZ_D = 'data_synth2_rzesz.yaml' # 2nd stage, synth/train+val with rzeszow/val for training
+RZESZOW_D = './rzeszow_data/rzeszow_data.yaml' # 3rd training stage - rzesz/test; val=val; test=train
+SYNTH_NEW_RZESZ_D = 'data_synth2_rzesz.yaml' # 2nd stage, synth/train+val with rzeszow/test for training
 
 
-def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_frozen=10) -> str:
+def training(model_pth: str, dataset: str, pn: str, stage: str, opt: str, lr: float = 0.001, eps: int = 10, n_frozen: int = 10) -> str:
+    '''
+    Train a model on a dataset/split
+    
+    :param model_pth: path to a .pt
+    :type model_pth: str
+    :param dataset: .yaml path
+    :type dataset: str
+    :param pn: project name
+    :type pn: str
+    :param stage: part of a nickname
+    :type stage: str
+    :param opt: optimiser
+    :type opt: str
+    :param lr: learning rate
+    :type lr: float
+    :param eps: no. epochs
+    :type eps: int
+    :param n_frozen: no. frozen layers
+    :type n_frozen: int
+    :return: path to the trained model
+    :rtype: str
+    '''
 
     model = YOLO(model_pth)
     print('start training', stage)
@@ -40,12 +65,12 @@ def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_fro
         data=dataset,
         epochs=eps,
         lr0=lr,
-        lrf=0.01,
-        batch=32,
-        optimizer=OPTIMISER,
+        lrf=0.5, #
+        batch=16,
+        optimizer=opt,
         freeze=n_frozen,
 
-        project=PROJECT_NAME,
+        project=pn,
         name=stage,
         exist_ok=True,
         val=False,
@@ -62,7 +87,7 @@ def training(model_pth: str, dataset: str, stage: str, lr=0.001, eps = 10, n_fro
     return str(model.trainer.best)
 
 
-def evaluation(model_pth: str, dataset: str, stage: str, splt='test', is_feval=False):
+def evaluation(model_pth: str, dataset: str, pn: str, stage: str, splt: str = 'test', is_feval: bool = False) -> Metric:
     '''
     Evaluate a model on a dataset/split
     
@@ -70,10 +95,16 @@ def evaluation(model_pth: str, dataset: str, stage: str, splt='test', is_feval=F
     :type model_pth: str
     :param dataset: .yaml path
     :type dataset: str
+    :param pn: project name
+    :type pn: str
     :param stage: part of a nickname
     :type stage: str
-    :param splt: a dataset split
+    :param splt: the validation dataset split
+    :type splt: str
     :param is_feval: for combining all metrics in a single .csv in full evaluation
+    :type is_feval: bool
+    :return: metrics
+    :rtype: SegmentMetrics
     '''
 
     model = YOLO(model_pth)
@@ -83,7 +114,7 @@ def evaluation(model_pth: str, dataset: str, stage: str, splt='test', is_feval=F
     metrics = model.val(
         data=dataset,
         split=splt,
-        project=PROJECT_NAME,
+        project=pn,
         name=f"{stage}_{splt}",
         # single_cls=True
     )
@@ -92,12 +123,12 @@ def evaluation(model_pth: str, dataset: str, stage: str, splt='test', is_feval=F
     t = time()-t
     print('eval done', stage, splt, 'in', t)
     
-    pth = f"{PROJECT_NAME}/{PROJECT_NAME}_{stage}_{splt}.csv"
+    pth = f"{pn}/{pn}_{stage}_{splt}.csv"
     f_mod = 'w'
     tm = '' # save eval time
     if is_feval:
         csv_data = csv_data.split('\n')[1] # skip header
-        pth = f"{PROJECT_NAME}/{PROJECT_NAME}_feval.csv"
+        pth = f"{pn}/{pn}_feval.csv"
         f_mod = 'a'
         tm = f',{t}' # save eval time
     with open(pth, f_mod) as f:
@@ -106,37 +137,45 @@ def evaluation(model_pth: str, dataset: str, stage: str, splt='test', is_feval=F
     return metrics
 
 
-def many_eval(model):
+def many_eval(model: str, proj_name: str):
     '''
     Evaluate the model on all available datasets and their splits
     
     :param model: YOLO model
+    :type model: str
+    :param proj_name: project name
+    :type proj_name: str
     '''
+
     ds = 'synth_new2' # train-val-test split by src img
-    evaluation(model, SYNTH_D_NEW, ds, 'train', True)
-    evaluation(model, SYNTH_D_NEW, ds, 'val', True)
-    evaluation(model, SYNTH_D_NEW, ds, 'test', True)
+    evaluation(model, SYNTH_D_NEW2, proj_name, ds, 'train', True) # train+val
+    evaluation(model, SYNTH_D_NEW2, proj_name, ds, 'val', True)
+    evaluation(model, SYNTH_D_NEW2, proj_name, ds, 'test', True)
     
     ds = 'synth_new1' # shuffeled train-val-test split (src img and augmentations may be in any split)
-    evaluation(model, SYNTH_D_NEW1, ds, 'train', True)
-    evaluation(model, SYNTH_D_NEW1, ds, 'val', True)
-    evaluation(model, SYNTH_D_NEW1, ds, 'test', True)
+    evaluation(model, SYNTH_D_NEW1, proj_name, ds, 'train', True)
+    evaluation(model, SYNTH_D_NEW1, proj_name, ds, 'val', True)
+    evaluation(model, SYNTH_D_NEW1, proj_name, ds, 'test', True)
 
     ds = 'synth_old'
-    evaluation(model, SYNTH_D_OLD, ds, 'train', True)
-    evaluation(model, SYNTH_D_OLD, ds, 'val', True)
-    evaluation(model, SYNTH_D_OLD, ds, 'test', True)
+    evaluation(model, SYNTH_D_OLD, proj_name, ds, 'train', True)
+    evaluation(model, SYNTH_D_OLD, proj_name, ds, 'val', True)
+    evaluation(model, SYNTH_D_OLD, proj_name, ds, 'test', True)
+    
+    ds = 'mix_synth_rzesz'
+    evaluation(model, SYNTH_NEW_RZESZ_D, proj_name, ds, 'train', True)
 
     ds = 'rzeszow'
-    evaluation(model, RZESZOW_D, ds, 'train', True)
-    evaluation(model, RZESZOW_D, ds, 'val', True)
-    evaluation(model, RZESZOW_D, ds, 'test', True)
+    evaluation(model, RZESZOW_D, proj_name, ds, 'train', True) # 2nd + 3rd stage training on rzeszow/test
+    evaluation(model, RZESZOW_D, proj_name, ds, 'val', True)
+    evaluation(model, RZESZOW_D, proj_name, ds, 'test', True) # rzeszow/train
 
     ds = 'pilot'
-    evaluation(model, PILOT_D, ds, 'test', True)
+    evaluation(model, PILOT_D, proj_name, ds, 'test', True)
 
 
-def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: str, stage: str, lr=0.001, eps = 10, n_frozen=10, v_splt='test'):
+def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: str, mode: str, proj_name: str, stage: str, 
+             opt: str, lr: float = 0.001, eps: int = 10, n_frozen: int = 10, v_splt: str = 'val') -> tuple[str, int]:
     """
     train and evaluate, repeat n times. stop if the performance drops by 20% from the best
     
@@ -152,13 +191,20 @@ def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: st
     :type val_dataset: str
     :param stage: part of a nickname
     :type stage: str
+    :param opt: optimiser
+    :type opt: str
     :param lr: learning rate
+    :type lr: float
     :param eps: no. epochs
+    :type eps: int
     :param n_frozen: no. frozen layers
+    :type n_frozen: int
     :param v_splt: dataset-specific, train/val/test/etc.
-    :return model: path to the best model
-    :return id: part of a nickname
+    :type v_splt: str
+    :return: model: path to the best model, id: part of a nickname
+    :rtype: tuple[str, int]
     """
+
     best_map = 0
     best_m_f1 = 0
     t = time()
@@ -166,15 +212,16 @@ def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: st
 
     for id in range(start_id, start_id + n):
         stg = f'{id}_{stage}'
-        model = training(model, tr_dataset, stg, lr, eps, n_frozen)
-        metrics = evaluation(model, val_dataset, stg, v_splt)
-        if metrics.box.map < best_map * PERFORM_DECAY_LIMIT_FACTOR or metrics.seg.f1 < best_m_f1 * PERFORM_DECAY_LIMIT_FACTOR:
+        model = training(model, tr_dataset, proj_name, stg, opt, lr, eps, n_frozen)
+        metrics = evaluation(model, val_dataset, proj_name, stg, v_splt)
+        if metrics.box.map < best_map * PERFORM_DECAY_LIMIT_FACTOR \
+        or mode == SEG and metrics.seg.f1 < best_m_f1 * PERFORM_DECAY_LIMIT_FACTOR:
             print('performance decay!')
             break
         if metrics.box.map > best_map:
             print('outperformed by box-map')
             best_map = metrics.box.map
-        if metrics.seg.map > best_m_f1:
+        if mode == SEG and metrics.seg.map > best_m_f1:
             print('outperformed by mask-f1')
             best_m_f1 = metrics.seg.f1
 
@@ -182,40 +229,44 @@ def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: st
     return model, id
 
 
-def main():
+def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
     """
     run 3 phases
-    """
-    # mod = training(BASE_MODEL, SYNTH_D_NEW, '1S', 0.001)
-    # metr = evaluation(mod, RZESZOW_D, '1S')
-    # mod = training(mod, SYNTH_D_NEW, '2S', 0.001)
-    # metr = evaluation(mod, RZESZOW_D, '2S')
-
-    # mod = training(mod, SYNTH_NEW_RZESZ_D, '3SR', 0.0001)
-    # metr = evaluation(mod, RZESZOW_D, '3SR')
-    # mod = training(mod, SYNTH_NEW_RZESZ_D, '4SR', 0.0001)
-    # metr = evaluation(mod, RZESZOW_D, '4SR')
     
-    # mod = training(mod, RZESZOW_VAL, '5SR', 0.00001, n_frozen=12)
-    # metr = evaluation(mod, RZESZOW_D, '5SR')
-    # mod = training(mod, RZESZOW_VAL, '6SR', 0.00001, n_frozen=12)
-    # metr = evaluation(mod, RZESZOW_D, '6SR')
+    :param opt: optimiser
+    :type opt: str
+    :param base: base model
+    :type base: str
+    :param mode: YOLO task
+    :type mode: str
+    """
+    pn = f'{PROJECT_NAME}_{opt}'
+    if base != BASE_MODEL:
+        pn = f'{pn}_{base}'        
 
     t = time()
-    no_layers = len(YOLO(BASE_MODEL).model.model)
-    print(OPTIMISER, no_layers, 'layers')
+    no_layers = len(YOLO(base).model.model)
+    print(opt, no_layers, 'layers')
 
-    lr = 0.001
-    lr = 0.0005
-    lr = 0.0001
-    mod, id = tune_val(1, 5, BASE_MODEL, SYNTH_D_NEW, RZESZOW_D, 's', lr) # train: synth-train, test: rzesz-test
+    lr = LR # 0.001
+    # lr = 0.0005
+    # lr = 0.0001
+
+    mod, id = tune_val(1, 3, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
     # many_eval(mod)
-    mod, id = tune_val(id, 5, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, 'sr', lr/2) # train: synth-train+rzesz-val, test: rzesz-test
-    mod, id = tune_val(id, 5, mod, RZESZOW_VAL, RZESZOW_D, 'r', lr/5, n_frozen=no_layers-2) # train: rzesz-val, test: rzesz-test
+    mod, id = tune_val(id, 2, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 2, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
+
     t = time() - t
-    many_eval(mod)
-    print(PROJECT_NAME, 'fine tuning took', t)
+    many_eval(mod, pn)
+    print(pn, 'fine tuning took', t)
 
 
 if __name__ == '__main__':
-    main()
+    main(SGD, BASE_MODEL, SEG)
+    main(ADAMW, BASE_MODEL, SEG)
+    main(RMS, BASE_MODEL, SEG)
+    main(SGD, ARIEL, DET)
+    main(ADAMW, ARIEL, DET)
+    main(RMS, ARIEL, DET)
+

@@ -1,0 +1,9 @@
+train: 
+  - training/images
+  - validation/images
+val: validation/images
+test: test/images
+
+names: 
+  0: pv
+  
