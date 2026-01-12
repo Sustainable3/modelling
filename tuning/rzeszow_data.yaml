@@ -1,0 +1,6 @@
+train: test/images
+val: valid/images
+test: train/images
+
+names: 
+  0: pv

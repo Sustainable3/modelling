@@ -1,0 +1,20 @@
+train-val scheme
+
+at first:
+1. synth2/train; rzesz/test
+2. synth2/train + rzesz/val; rzesz/test
+3. rzesz/val; rzesz/test
+pure YOLO11l
+
+since ft20:
+1. synth2/train+val; rzesz/val
+2. synth2/train+val + rzesz/test; rzesz/val
+3. rzesz/test; rzesz/val
+
+full eval - everything
+
+datasets:
+for feval rzeszow/train and test are swapped
+
+let's declare the best segmentation model: ft21_SGD
+/users/project1/pt01299/tuning/ft21_SGD/5_r/weights/best.pt

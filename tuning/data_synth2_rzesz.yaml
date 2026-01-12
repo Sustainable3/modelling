@@ -1,0 +1,9 @@
+train:
+  - synth_dataset2/training/images
+  - synth_dataset2/validation/images
+  - rzeszow_data/test/images
+val: synth_dataset2/validation/images
+test: synth_dataset2/test/images
+
+names: 
+  0: pv
