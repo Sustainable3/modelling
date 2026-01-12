@@ -5,7 +5,7 @@ from time import time
 fine-tuning script for PV det+seg YOLO model
 according to the recipe by prof. PS
 
-developed against catastrophical forgetting
+developed against catastrophic forgetting
 
 I 2026, MD
 '''
