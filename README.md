@@ -18,9 +18,14 @@ This repository comprises works undertaken to evaluate, fine-tune and employ AI 
     - [sam_comparison.csv](panels/sam_comparison.csv)
  
 ### PV fine-tuning
-- synthetic dataset
-    - [tuning and baseline results](tuning/full_res.csv)
-    - [tuning script](tuning/yolo_fine_tune_ariel.py)
+- mixed datasets
+    - [tuning script](tuning/robust_tuning.py)
+    - [tuning and baseline results](tuning/evaluation_resultsft21SGD2.pt.csv)
+    - [tuning scenario comparisons](tuning/compare_pv_ft.xlsx)
+    - [notes](tuning/note.txt)
+- pure synthetic dataset
+    - [tuning and baseline results](tuning/previous/full_res.csv)
+    - [tuning script](tuning/previous/yolo_fine_tune_ariel.py)
 - Fresno dataset
     - [tuning script](fresno/fine_tune.py)
     - [high-res img evaluation](fresno/combined_pv_eval_large_res.py)
