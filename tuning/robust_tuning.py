@@ -12,6 +12,7 @@ I 2026, MD
 
 
 BASE_MODEL = 'yolo11l-seg.pt'
+BASE_MODEL8 = 'yolov8l-seg.pt'
 SEG = 'segment'
 ARIEL = 'ariel.pt'
 DET = 'detect'
@@ -22,8 +23,8 @@ SGD = 'SGD'
 ADAMW = 'AdamW'
 RMS = 'RMSProp'
 
-PROJECT_NAME = 'ft25' # mod ft12b settings
-LR = 0.0001
+PROJECT_NAME = 'ft21v8' # mod ft7 settings
+LR = 0.001
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
 SYNTH_D_NEW2 = './synth_dataset2/data_synth.yaml' # 1st+2nd stage; synth/train+val; 2nd split - no leakage by agumentations in train+test
@@ -65,7 +66,7 @@ def training(model_pth: str, dataset: str, pn: str, stage: str, opt: str, lr: fl
         data=dataset,
         epochs=eps,
         lr0=lr,
-        lrf=0.01,
+        lrf=0.5,
         batch=16,
         optimizer=opt,
         freeze=n_frozen,
@@ -252,10 +253,10 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
     # lr = 0.0005
     # lr = 0.0001
 
-    mod, id = tune_val(1, 5, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
+    mod, id = tune_val(1, 3, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
     # many_eval(mod)
-    mod, id = tune_val(id, 5, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
-    mod, id = tune_val(id, 5, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 2, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 2, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
 
     t = time() - t
     many_eval(mod, pn)
@@ -263,10 +264,11 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
 
 
 if __name__ == '__main__':
+    main(SGD, BASE_MODEL8, SEG)
     main(SGD, BASE_MODEL, SEG)
-    main(ADAMW, BASE_MODEL, SEG)
-    main(RMS, BASE_MODEL, SEG)
-    main(SGD, ARIEL, DET)
-    main(ADAMW, ARIEL, DET)
-    main(RMS, ARIEL, DET)
+    # main(ADAMW, BASE_MODEL, SEG)
+    # main(RMS, BASE_MODEL, SEG)
+    # main(SGD, ARIEL, DET)
+    # main(ADAMW, ARIEL, DET)
+    # main(RMS, ARIEL, DET)
 
