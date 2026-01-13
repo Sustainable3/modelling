@@ -5,7 +5,7 @@ from time import time
 fine-tuning script for PV det+seg YOLO model
 according to the recipe by prof. PS
 
-developed against catastrophic forgetting
+developed against catastrophical forgetting
 
 I 2026, MD
 '''
@@ -24,7 +24,7 @@ SGD = 'SGD'
 ADAMW = 'AdamW'
 RMS = 'RMSProp'
 
-PROJECT_NAME = 'ft21fin' # mod ft7 settings
+PROJECT_NAME = 'ft26'
 LR = 0.001
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -254,10 +254,10 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
     # lr = 0.0005
     # lr = 0.0001
 
-    mod, id = tune_val(1, 3, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
+    mod, id = tune_val(1, 4, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
     # many_eval(mod)
-    mod, id = tune_val(id, 2, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
-    mod, id = tune_val(id, 2, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 4, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 4, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
 
     t = time() - t
     many_eval(mod, pn)
@@ -266,8 +266,9 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
 
 if __name__ == '__main__':
     main(SGD, FINLOOP, SEG)
-    #main(SGD, BASE_MODEL, SEG)
-    # main(ADAMW, BASE_MODEL, SEG)
+    main(SGD, BASE_MODEL, SEG)
+    main(ADAMW, BASE_MODEL, SEG)
+    main(ADAMW, FINLOOP, SEG)
     # main(RMS, BASE_MODEL, SEG)
     # main(SGD, ARIEL, DET)
     # main(ADAMW, ARIEL, DET)
