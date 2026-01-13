@@ -16,6 +16,7 @@ BASE_MODEL8 = 'yolov8l-seg.pt'
 SEG = 'segment'
 ARIEL = 'ariel.pt'
 DET = 'detect'
+FINLOOP = 'finloop.pt'
 
 PERFORM_DECAY_LIMIT_FACTOR = 0.8
 
@@ -23,7 +24,7 @@ SGD = 'SGD'
 ADAMW = 'AdamW'
 RMS = 'RMSProp'
 
-PROJECT_NAME = 'ft21v8' # mod ft7 settings
+PROJECT_NAME = 'ft21fin' # mod ft7 settings
 LR = 0.001
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -264,8 +265,8 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
 
 
 if __name__ == '__main__':
-    main(SGD, BASE_MODEL8, SEG)
-    main(SGD, BASE_MODEL, SEG)
+    main(SGD, FINLOOP, SEG)
+    #main(SGD, BASE_MODEL, SEG)
     # main(ADAMW, BASE_MODEL, SEG)
     # main(RMS, BASE_MODEL, SEG)
     # main(SGD, ARIEL, DET)
