@@ -17,4 +17,4 @@ datasets:
 for feval rzeszow/train and test are swapped
 
 let's declare the best segmentation model: ft21_SGD
-/users/project1/pt01299/tuning/ft21_SGD/5_r/weights/best.pt
+/users/project1/pt01299/tuning/ft21SGD.pt

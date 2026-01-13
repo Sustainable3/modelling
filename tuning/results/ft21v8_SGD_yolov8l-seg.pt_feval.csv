@@ -1,4 +1,4 @@
-dataset,split,Class,Images,Instances,Box-P,Box-R,Box-F1,mAP50,mAP50-95,t
+dataset,split,Class,Images,Instances,Box-P,Box-R,Box-F1,mAP50,mAP50-95,Mask-P,Mask-R,Mask-F1,t
 synth_new2,train,pv,1014,1014,0.995,0.984,0.99,0.994,0.898,0.994,0.983,0.989,14.440751075744629
 synth_new2,val,pv,225,225,0.987,0.999,0.993,0.993,0.899,0.987,0.999,0.993,8.375879526138306
 synth_new2,test,pv,114,114,1.0,0.99,0.995,0.995,0.739,1.0,0.99,0.995,9.806266784667969
