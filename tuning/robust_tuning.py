@@ -24,8 +24,8 @@ SGD = 'SGD'
 ADAMW = 'AdamW'
 RMS = 'RMSProp'
 
-PROJECT_NAME = 'ft26'
-LR = 0.001
+PROJECT_NAME = 'ft27'
+LR = 0.0005
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
 SYNTH_D_NEW2 = './synth_dataset2/data_synth.yaml' # 1st+2nd stage; synth/train+val; 2nd split - no leakage by agumentations in train+test
