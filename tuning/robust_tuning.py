@@ -5,7 +5,7 @@ from time import time
 fine-tuning script for PV det+seg YOLO model
 according to the recipe by prof. PS
 
-developed against catastrophical forgetting
+developed against catastrophic forgetting
 
 I 2026, MD
 '''
@@ -24,7 +24,7 @@ SGD = 'SGD'
 ADAMW = 'AdamW'
 RMS = 'RMSProp'
 
-PROJECT_NAME = 'ft27'
+PROJECT_NAME = 'ft28'
 LR = 0.0005
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -67,7 +67,7 @@ def training(model_pth: str, dataset: str, pn: str, stage: str, opt: str, lr: fl
         data=dataset,
         epochs=eps,
         lr0=lr,
-        lrf=0.5,
+        lrf=1.0,
         batch=16,
         optimizer=opt,
         freeze=n_frozen,
