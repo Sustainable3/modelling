@@ -24,8 +24,8 @@ SGD = 'SGD'
 ADAMW = 'AdamW'
 RMS = 'RMSProp'
 
-PROJECT_NAME = 'ft28'
-LR = 0.0005
+PROJECT_NAME = 'ft33'
+LR = 0.00005
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
 SYNTH_D_NEW2 = './synth_dataset2/data_synth.yaml' # 1st+2nd stage; synth/train+val; 2nd split - no leakage by agumentations in train+test
@@ -67,8 +67,8 @@ def training(model_pth: str, dataset: str, pn: str, stage: str, opt: str, lr: fl
         data=dataset,
         epochs=eps,
         lr0=lr,
-        lrf=1.0,
-        batch=16,
+        lrf=0.4,
+        batch=32,
         optimizer=opt,
         freeze=n_frozen,
 
@@ -254,10 +254,10 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
     # lr = 0.0005
     # lr = 0.0001
 
-    mod, id = tune_val(1, 4, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
+    mod, id = tune_val(1, 8, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
     # many_eval(mod)
-    mod, id = tune_val(id, 4, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
-    mod, id = tune_val(id, 4, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 7, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 5, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
 
     t = time() - t
     many_eval(mod, pn)
