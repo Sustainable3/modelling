@@ -24,7 +24,7 @@ SGD = 'SGD'
 ADAMW = 'AdamW'
 RMS = 'RMSProp'
 
-PROJECT_NAME = 'ft30'
+PROJECT_NAME = 'ft31'
 LR = 0.00005
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
@@ -254,10 +254,10 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
     # lr = 0.0005
     # lr = 0.0001
 
-    mod, id = tune_val(1, 6, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
+    mod, id = tune_val(1, 8, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
     # many_eval(mod)
-    mod, id = tune_val(id, 6, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
-    mod, id = tune_val(id, 4, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 7, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 5, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
 
     t = time() - t
     many_eval(mod, pn)
