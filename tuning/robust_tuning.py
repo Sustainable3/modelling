@@ -22,10 +22,12 @@ PERFORM_DECAY_LIMIT_FACTOR = 0.8
 
 SGD = 'SGD'
 ADAMW = 'AdamW'
+ADAM = 'Adam'
 RMS = 'RMSProp'
+AUTO = 'auto'
 
-PROJECT_NAME = 'ft33'
-LR = 0.00005
+PROJECT_NAME = 'ft42'
+LR = 0.000005
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
 SYNTH_D_NEW2 = './synth_dataset2/data_synth.yaml' # 1st+2nd stage; synth/train+val; 2nd split - no leakage by agumentations in train+test
@@ -67,7 +69,7 @@ def training(model_pth: str, dataset: str, pn: str, stage: str, opt: str, lr: fl
         data=dataset,
         epochs=eps,
         lr0=lr,
-        lrf=0.4,
+        lrf=0.1,
         batch=32,
         optimizer=opt,
         freeze=n_frozen,
@@ -151,12 +153,12 @@ def many_eval(model: str, proj_name: str):
 
     ds = 'synth_new2' # train-val-test split by src img
     evaluation(model, SYNTH_D_NEW2, proj_name, ds, 'train', True) # train+val
-    evaluation(model, SYNTH_D_NEW2, proj_name, ds, 'val', True)
+    # evaluation(model, SYNTH_D_NEW2, proj_name, ds, 'val', True)
     evaluation(model, SYNTH_D_NEW2, proj_name, ds, 'test', True)
     
     ds = 'synth_new1' # shuffeled train-val-test split (src img and augmentations may be in any split)
-    evaluation(model, SYNTH_D_NEW1, proj_name, ds, 'train', True)
-    evaluation(model, SYNTH_D_NEW1, proj_name, ds, 'val', True)
+    # evaluation(model, SYNTH_D_NEW1, proj_name, ds, 'train', True)
+    # evaluation(model, SYNTH_D_NEW1, proj_name, ds, 'val', True)
     evaluation(model, SYNTH_D_NEW1, proj_name, ds, 'test', True)
 
     ds = 'synth_old'
@@ -254,10 +256,10 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
     # lr = 0.0005
     # lr = 0.0001
 
-    mod, id = tune_val(1, 8, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
+    mod, id = tune_val(1, 18, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
     # many_eval(mod)
-    mod, id = tune_val(id, 7, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
-    mod, id = tune_val(id, 5, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 15, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 12, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
 
     t = time() - t
     many_eval(mod, pn)
@@ -266,9 +268,12 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
 
 if __name__ == '__main__':
     main(SGD, FINLOOP, SEG)
-    main(SGD, BASE_MODEL, SEG)
-    main(ADAMW, BASE_MODEL, SEG)
+    # main(SGD, BASE_MODEL, SEG)
+    # main(ADAMW, BASE_MODEL, SEG)
     main(ADAMW, FINLOOP, SEG)
+    main(ADAM, FINLOOP, SEG)
+    main(AUTO, FINLOOP, SEG)
+
     # main(RMS, BASE_MODEL, SEG)
     # main(SGD, ARIEL, DET)
     # main(ADAMW, ARIEL, DET)
