@@ -16,5 +16,4 @@ full eval - everything
 datasets:
 for feval rzeszow/train and test are swapped
 
-let's declare the best segmentation model: ft21_SGD
-/users/project1/pt01299/tuning/ft21SGD.pt
+let's declare the best segmentation model: ft26_SGD_finloop
