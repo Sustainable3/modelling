@@ -1,14 +1,4 @@
 setting,Box-F1,mAP50,mAP50-95,Mask-F1
-ft10_AdamW_feval.csv,0.996,0.995,0.89,0.996
-ft10_SGD_feval.csv,0.997,0.995,0.844,0.997
-ft11_AdamW_feval.csv,1.0,0.995,0.897,1.0
-ft11_SGD_feval.csv,0.971,0.99,0.726,0.971
-ft12b_AdamW_feval.csv,1.0,0.995,0.91,1.0
-ft12b_SGD_feval.csv,0.928,0.977,0.621,0.919
-ft12c_AdamW_feval.csv,0.999,0.995,0.914,0.999
-ft12c_SGD_feval.csv,0.941,0.981,0.606,0.941
-ft12_AdamW_feval.csv,0.997,0.995,0.879,0.997
-ft12_SGD_feval.csv,0.982,0.994,0.796,0.982
 ft20_AdamW_ariel.pt_feval.csv,0.99,0.995,0.836,0
 ft20_AdamW_feval.csv,1.0,0.995,0.881,1.0
 ft20_RMSProp_ariel.pt_feval.csv,0.912,0.952,0.557,0
@@ -80,12 +70,3 @@ ft33_AdamW_feval.csv,0.998,0.995,0.934,0.998
 ft33_AdamW_finloop.pt_feval.csv,0.948,0.984,0.714,0.943
 ft33_SGD_feval.csv,0.989,0.995,0.775,0.984
 ft33_SGD_finloop.pt_feval.csv,0.732,0.79,0.407,0.725
-ft7_feval_AdamW.csv,0.997,0.994,0.86,0.997
-ft7_feval_auto.csv,0.997,0.995,0.84,0.997
-ft7_feval_SGD.csv,1.0,0.995,0.866,1.0
-ft8_feval_AdamW.csv,0.997,0.995,0.877,0.997
-ft8_feval_auto.csv,0.997,0.995,0.84,0.997
-ft8_feval_SGD.csv,0.996,0.995,0.83,0.996
-ft9_feval_AdamW.csv,0.999,0.995,0.897,0.999
-ft9_feval_auto.csv,0.997,0.995,0.84,0.997
-ft9_feval_SGD.csv,0.965,0.987,0.684,0.965

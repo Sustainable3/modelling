@@ -1,37 +1,16 @@
-"""combined_PV_eval.ipynb
+'''
+Docstring for tuning.combined_pv_eval
 
-# PV combined evaluation
-"""
 
-"""source (Huggingface): finloop/yolov8s-seg-solar-panels (aka Rzeszów model)
 
-source (Huggingface): https://huggingface.co/spaces/ArielDrabkin/Solar-Panel-Detector
+I 26
 
-source (Huggingface): andrewgray11/autotrain-solar-panel-object-detection-50559120777
-
-XI 25
-
-*MD*
-"""
+MD
+'''
 
 from ultralytics import YOLO
 from time import time
-import torch
 
-def sprawdz_gpu():
-    print(f"Wersja PyTorch: {torch.__version__}")
-    
-    if torch.cuda.is_available():
-        print("\n GPU (CUDA) jest dostępne!")
-        print(f"Liczba urządzeń: {torch.cuda.device_count()}")
-        print(f"Nazwa obecnego GPU: {torch.cuda.get_device_name(0)}")
-        device = torch.device("cuda")
-        
-    else:
-        print("\n GPU nie jest dostępne. Obliczenia będą wykonywane na CPU.")
-        device = torch.device("cpu")
-    
-    print(f"Aktywne urządzenie: {device}")
 
 if __name__ == '__main__':
 
@@ -73,12 +52,10 @@ if __name__ == '__main__':
         #'ariel_16_auto': 'fine_trening/ariel_16_auto/weights/best.pt',
     }
 
-    sprawdz_gpu()
-
     print('start')
 
     with open('evaluation_results_fts_h100.csv', 'w') as f:
-        f.write('dataset,split,model,Class,Images,Instances,Box-P,Box-R,Box-F1,mAP50,mAP50-95,Mask-P,Mask-R,Mask-F1,t\n')
+        f.write('dataset,split,model,Class,Images,Instances,Box-P,Box-R,Box-F1,Box-mAP50,Box-mAP50-95,Mask-P,Mask-R,Mask-F1,Mask-mAP50,Mask-mAP50-95,t\n')
 
     for data_key, dataset in datasets.items():
         print('start', data_key)
@@ -88,12 +65,13 @@ if __name__ == '__main__':
                 bt = 16 if model_key == 'pools' else 128
                 print(model_key, model)
                 model = YOLO(model)
-                suffix = ',0,0,0' if not model_key.startswith('finloop') and model_key != 'ft21SGD.pt'  else ''
+                suffix = ',0,0,0,0,0' if not model_key.startswith('finloop') and model_key != 'ft21SGD.pt'  else ''
                 t = time()
-                results = model.val(data=dataset, single_cls=True, batch=bt, iou=0.7, split=splt, plots=True, project=f'runs/{data_key}_{splt}_{model_key}')
+                results = model.val(data=dataset, batch=bt, iou=0.7, split=splt, plots=True, project=f'runs/{data_key}_{splt}_{model_key}')
                 t = time()-t
+                _, _, map50, map5095 = results.seg.mean_results()
                 with open('evaluation_results_fts_h100.csv', 'a') as f:
-                    f.write(f'{data_key},{splt},{model_key},{results.to_csv(decimals=3).splitlines()[1]}{suffix},{t}\n')
+                    f.write(f'{data_key},{splt},{model_key},{results.to_csv(decimals=5).splitlines()[1]},{map50},{map5095},{t}\n')
                 print('done', model_key, data_key, splt, 'in', t)
             print('end', splt)
         print('end', data_key)
