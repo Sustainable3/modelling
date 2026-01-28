@@ -1,6 +1,3 @@
-from ultralytics import YOLO
-from ultralytics.utils.metrics import Metric
-from time import time
 '''
 fine-tuning script for PV det+seg YOLO model
 according to the recipe by prof. PS
@@ -9,6 +6,10 @@ developed against catastrophic forgetting
 
 I 2026, MD
 '''
+
+from ultralytics import YOLO
+from ultralytics.utils.metrics import Metric
+from time import time
 
 
 BASE_MODEL = 'yolo11l-seg.pt'
@@ -26,8 +27,8 @@ ADAM = 'Adam'
 RMS = 'RMSProp'
 AUTO = 'auto'
 
-PROJECT_NAME = 'ft42'
-LR = 0.000005
+PROJECT_NAME = 'ft47cos'
+LR = 0.001
 
 PILOT_D = './pilotPV_panels.v1i.yolov8-obb/data.yaml' # for full eval
 SYNTH_D_NEW2 = './synth_dataset2/data_synth.yaml' # 1st+2nd stage; synth/train+val; 2nd split - no leakage by agumentations in train+test
@@ -69,12 +70,13 @@ def training(model_pth: str, dataset: str, pn: str, stage: str, opt: str, lr: fl
         data=dataset,
         epochs=eps,
         lr0=lr,
-        lrf=0.1,
-        batch=32,
+        lrf=0.5,
+        batch=16,
         optimizer=opt,
         freeze=n_frozen,
+        cos_lr=True,
 
-        project=pn,
+        project=f'/users/project1/pt01299/tuning/{pn}',
         name=stage,
         exist_ok=True,
         val=False,
@@ -118,21 +120,23 @@ def evaluation(model_pth: str, dataset: str, pn: str, stage: str, splt: str = 't
     metrics = model.val(
         data=dataset,
         split=splt,
-        project=pn,
+        project=f'/users/project1/pt01299/tuning/{pn}',
         name=f"{stage}_{splt}",
         # single_cls=True
     )
 
-    csv_data = metrics.to_csv(decimals = 3)
+    csv_data = metrics.to_csv(decimals = 5)
     t = time()-t
+    _, _, map50, map5095 = metrics.seg.mean_results()
+    csv_data = f'{csv_data},{map50},{map5095}'
     print('eval done', stage, splt, 'in', t)
     
-    pth = f"{pn}/{pn}_{stage}_{splt}.csv"
+    pth = f"/users/project1/pt01299/tuning/{pn}/{pn}_{stage}_{splt}.csv"
     f_mod = 'w'
     tm = '' # save eval time
     if is_feval:
         csv_data = csv_data.split('\n')[1] # skip header
-        pth = f"{pn}/{pn}_feval.csv"
+        pth = f"/users/project1/pt01299/tuning/{pn}/{pn}_feval.csv"
         f_mod = 'a'
         tm = f',{t}' # save eval time
     with open(pth, f_mod) as f:
@@ -210,7 +214,6 @@ def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: st
     """
 
     best_map = 0
-    best_m_f1 = 0
     t = time()
     print('start phase', stage, 'for', n, 'reps')
 
@@ -218,19 +221,16 @@ def tune_val(start_id: int, n: int, model: str, tr_dataset: str, val_dataset: st
         stg = f'{id}_{stage}'
         model = training(model, tr_dataset, proj_name, stg, opt, lr, eps, n_frozen)
         metrics = evaluation(model, val_dataset, proj_name, stg, v_splt)
-        if metrics.box.map < best_map * PERFORM_DECAY_LIMIT_FACTOR \
-        or mode == SEG and metrics.seg.f1 < best_m_f1 * PERFORM_DECAY_LIMIT_FACTOR:
+        _, _, map50, map5095 = metrics.seg.mean_results()
+        if map5095 < best_map * PERFORM_DECAY_LIMIT_FACTOR:
             print('performance decay!')
             break
-        if metrics.box.map > best_map:
-            print('outperformed by box-map')
-            best_map = metrics.box.map
-        if mode == SEG and metrics.seg.map > best_m_f1:
-            print('outperformed by mask-f1')
-            best_m_f1 = metrics.seg.f1
+        if map5095 > best_map:
+            print('outperformed by mask-map50-95')
+            best_map = map5095
 
     print('done phase', stage, 'in', time()-t)
-    return model, id
+    return model, id+1
 
 
 def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
@@ -250,16 +250,13 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
 
     t = time()
     no_layers = len(YOLO(base).model.model)
-    print(opt, no_layers, 'layers')
+    print(base, opt, no_layers, 'layers')
 
-    lr = LR # 0.001
-    # lr = 0.0005
-    # lr = 0.0001
+    lr = LR
 
-    mod, id = tune_val(1, 18, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
-    # many_eval(mod)
-    mod, id = tune_val(id, 15, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
-    mod, id = tune_val(id, 12, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
+    mod, id = tune_val(1, 4, base, SYNTH_D_NEW2, RZESZOW_D, mode, pn, 's', opt, lr) # train: synth/train+val, test: rzesz-val
+    mod, id = tune_val(id, 4, mod, SYNTH_NEW_RZESZ_D, RZESZOW_D, mode, pn, 'sr', opt, lr/2) # train: synth/train+val + rzesz/test, test: rzesz-val
+    mod, id = tune_val(id, 4, mod, RZESZOW_D, RZESZOW_D, mode, pn, 'r', opt, lr/5, n_frozen=no_layers-2) # train: rzesz/test, test: rzesz-val
 
     t = time() - t
     many_eval(mod, pn)
@@ -268,14 +265,8 @@ def main(opt: str = SGD, base: str = BASE_MODEL, mode: str = SEG):
 
 if __name__ == '__main__':
     main(SGD, FINLOOP, SEG)
-    # main(SGD, BASE_MODEL, SEG)
-    # main(ADAMW, BASE_MODEL, SEG)
+    main(SGD, BASE_MODEL, SEG)
+    main(ADAMW, BASE_MODEL, SEG)
     main(ADAMW, FINLOOP, SEG)
     main(ADAM, FINLOOP, SEG)
     main(AUTO, FINLOOP, SEG)
-
-    # main(RMS, BASE_MODEL, SEG)
-    # main(SGD, ARIEL, DET)
-    # main(ADAMW, ARIEL, DET)
-    # main(RMS, ARIEL, DET)
-
