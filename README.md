@@ -36,7 +36,7 @@ This repository comprises works undertaken to evaluate, fine-tune and employ AI 
 - [tree_area_calculation](tree_area/tree_area_calculation)
 
 ### analysis
-[correlation.ipynb](correlation.ipynb)
+[correlation.ipynb](correlation_v2.ipynb)
 
 ## acknowledgements
 > Obliczenia wykonano z wykorzystaniem komputerów Centrum Informatycznego Trójmiejskiej Akademickiej Sieci Komputerowej (Computations were carried out using the computers of Centre of Informatics Tricity Academic Supercomputer & Network).
